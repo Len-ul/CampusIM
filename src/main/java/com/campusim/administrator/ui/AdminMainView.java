@@ -28,11 +28,13 @@ public class AdminMainView {
 
     private TextField sUsernameField, sPasswordField, sStudentIdField;
     private ComboBox<String> sGenderField;
-    private TextField sGradeField, sMajorField, sClassField, sDeptField;
+    private TextField sGradeField, sClassField;
+    private ComboBox<String> sMajorField, sDeptField;
 
     private TextField tUsernameField, tPasswordField, tEmployeeIdField;
     private ComboBox<String> tGenderField;
-    private TextField tTitleField, tDepartmentField;
+    private TextField tTitleField;
+    private ComboBox<String> tDepartmentField;
 
     private Label statusLabel;
 
@@ -207,15 +209,25 @@ public class AdminMainView {
         sGradeField = new TextField();
         sGradeField.setPromptText("年级");
         sGradeField.setPrefWidth(60);
-        sMajorField = new TextField();
-        sMajorField.setPromptText("专业");
+        sMajorField = new ComboBox<>();
+        sMajorField.setPromptText("请选择专业");
         sMajorField.setPrefWidth(80);
         sClassField = new TextField();
         sClassField.setPromptText("班级");
         sClassField.setPrefWidth(80);
-        sDeptField = new TextField();
-        sDeptField.setPromptText("学院");
+        sDeptField = new ComboBox<>();
+        sDeptField.setPromptText("请选择学院");
         sDeptField.setPrefWidth(80);
+
+        // Load departments and majors
+        new Thread(() -> {
+            List<String> depts = AdminManager.getAllDepartments();
+            List<String> allMajors = AdminManager.getAllMajors();
+            Platform.runLater(() -> {
+                sDeptField.getItems().setAll(depts);
+                sMajorField.getItems().setAll(allMajors);
+            });
+        }).start();
 
         grid.add(new Label("用户名:"), 0, 0);
         grid.add(sUsernameField, 1, 0);
@@ -246,8 +258,32 @@ public class AdminMainView {
                 setStatus("用户名需2~10个字符", true);
                 return;
             }
-            if (!sPasswordField.getText().trim().matches("^(?=.*[a-zA-Z]).{8,13}$")) {
-                setStatus("密码需8~13位且至少包含1个字母", true);
+            if (!sPasswordField.getText().trim().matches("^(?=.*[a-zA-Z])(?=.*[0-9]).{8,15}$")) {
+                setStatus("密码需8~15位且至少包含一位字母和一位数字", true);
+                return;
+            }
+            if (!sStudentIdField.getText().trim().matches("S\\d{7}")) {
+                setStatus("学号格式不正确，需为S加7位数字", true);
+                return;
+            }
+            if (sGradeField.getText().trim().length() != 4) {
+                setStatus("入学年份长度需为4位", true);
+                return;
+            }
+            if (sClassField.getText().trim().length() != 4) {
+                setStatus("班级长度需为4位", true);
+                return;
+            }
+            if (sGenderField.getValue() == null) {
+                setStatus("请选择性别", true);
+                return;
+            }
+            if (sDeptField.getValue() == null) {
+                setStatus("请选择学院", true);
+                return;
+            }
+            if (sMajorField.getValue() == null) {
+                setStatus("请选择专业", true);
                 return;
             }
             new Thread(() -> {
@@ -255,8 +291,8 @@ public class AdminMainView {
                         sUsernameField.getText().trim(), sPasswordField.getText().trim(),
                         sStudentIdField.getText().trim(),
                         sGenderField.getValue(), sGradeField.getText().trim(),
-                        sMajorField.getText().trim(), sClassField.getText().trim(),
-                        sDeptField.getText().trim());
+                        sMajorField.getValue(), sClassField.getText().trim(),
+                        sDeptField.getValue());
                 Platform.runLater(() -> {
                     setStatus(ok ? "添加成功" : "添加失败，用户名或学号可能已存在", !ok);
                     if (ok) { loadStudents(); clearStudentForm(); }
@@ -278,8 +314,32 @@ public class AdminMainView {
                 return;
             }
             if (!sPasswordField.getText().trim().isEmpty()
-                    && !sPasswordField.getText().trim().matches("^(?=.*[a-zA-Z]).{8,13}$")) {
-                setStatus("密码需8~13位且至少包含1个字母", true);
+                    && !sPasswordField.getText().trim().matches("^(?=.*[a-zA-Z])(?=.*[0-9]).{8,15}$")) {
+                setStatus("密码需8~15位且至少包含一位字母和一位数字", true);
+                return;
+            }
+            if (!sStudentIdField.getText().trim().matches("S\\d{7}")) {
+                setStatus("学号格式不正确，需为S加7位数字", true);
+                return;
+            }
+            if (sGradeField.getText().trim().length() != 4) {
+                setStatus("入学年份长度需为4位", true);
+                return;
+            }
+            if (sClassField.getText().trim().length() != 4) {
+                setStatus("班级长度需为4位", true);
+                return;
+            }
+            if (sGenderField.getValue() == null) {
+                setStatus("请选择性别", true);
+                return;
+            }
+            if (sDeptField.getValue() == null) {
+                setStatus("请选择学院", true);
+                return;
+            }
+            if (sMajorField.getValue() == null) {
+                setStatus("请选择专业", true);
                 return;
             }
             new Thread(() -> {
@@ -287,8 +347,8 @@ public class AdminMainView {
                         sGenderField.getValue(),
                         sPasswordField.getText().trim().isEmpty() ? null : sPasswordField.getText().trim(),
                         sStudentIdField.getText().trim(), sGradeField.getText().trim(),
-                        sMajorField.getText().trim(), sClassField.getText().trim(),
-                        sDeptField.getText().trim());
+                        sMajorField.getValue(), sClassField.getText().trim(),
+                        sDeptField.getValue());
                 Platform.runLater(() -> {
                     setStatus(ok ? "修改成功" : "修改失败", !ok);
                     if (ok) { loadStudents(); clearStudentForm(); }
@@ -317,9 +377,9 @@ public class AdminMainView {
         sStudentIdField.setText(s.getStudentId());
         sGenderField.setValue(s.getGender() != null ? s.getGender() : null);
         sGradeField.setText(s.getGrade() != null ? s.getGrade() : "");
-        sMajorField.setText(s.getMajor() != null ? s.getMajor() : "");
+        sMajorField.setValue(s.getMajor() != null ? s.getMajor() : null);
         sClassField.setText(s.getClassName() != null ? s.getClassName() : "");
-        sDeptField.setText(s.getDepartment() != null ? s.getDepartment() : "");
+        sDeptField.setValue(s.getDepartment() != null ? s.getDepartment() : null);
         sUsernameField.setEditable(false);
         sAddBtn.setVisible(false);
         sSaveBtn.setVisible(true);
@@ -335,9 +395,9 @@ public class AdminMainView {
         sStudentIdField.clear();
         sGenderField.setValue(null);
         sGradeField.clear();
-        sMajorField.clear();
+        sMajorField.setValue(null);
         sClassField.clear();
-        sDeptField.clear();
+        sDeptField.setValue(null);
         sAddBtn.setVisible(true);
         sSaveBtn.setVisible(false);
         sCancelBtn.setVisible(false);
@@ -450,9 +510,15 @@ public class AdminMainView {
         tTitleField = new TextField();
         tTitleField.setPromptText("职称");
         tTitleField.setPrefWidth(80);
-        tDepartmentField = new TextField();
-        tDepartmentField.setPromptText("部门");
+        tDepartmentField = new ComboBox<>();
+        tDepartmentField.setPromptText("请选择学院");
         tDepartmentField.setPrefWidth(100);
+
+        // Load departments
+        new Thread(() -> {
+            List<String> depts = AdminManager.getAllDepartments();
+            Platform.runLater(() -> tDepartmentField.getItems().setAll(depts));
+        }).start();
 
         grid.add(new Label("用户名:"), 0, 0);
         grid.add(tUsernameField, 1, 0);
@@ -479,8 +545,24 @@ public class AdminMainView {
                 setStatus("用户名需2~10个字符", true);
                 return;
             }
-            if (!tPasswordField.getText().trim().matches("^(?=.*[a-zA-Z]).{8,13}$")) {
-                setStatus("密码需8~13位且至少包含1个字母", true);
+            if (!tPasswordField.getText().trim().matches("^(?=.*[a-zA-Z])(?=.*[0-9]).{8,15}$")) {
+                setStatus("密码需8~15位且至少包含一位字母和一位数字", true);
+                return;
+            }
+            if (!tEmployeeIdField.getText().trim().matches("T\\d{7}")) {
+                setStatus("工号格式不正确，需为T加7位数字", true);
+                return;
+            }
+            if (tTitleField.getText().trim().length() < 2 || tTitleField.getText().trim().length() > 10) {
+                setStatus("职称长度需2~10位", true);
+                return;
+            }
+            if (tGenderField.getValue() == null) {
+                setStatus("请选择性别", true);
+                return;
+            }
+            if (tDepartmentField.getValue() == null) {
+                setStatus("请选择学院", true);
                 return;
             }
             new Thread(() -> {
@@ -488,7 +570,7 @@ public class AdminMainView {
                         tUsernameField.getText().trim(), tPasswordField.getText().trim(),
                         tEmployeeIdField.getText().trim(),
                         tGenderField.getValue(), tTitleField.getText().trim(),
-                        tDepartmentField.getText().trim());
+                        tDepartmentField.getValue());
                 Platform.runLater(() -> {
                     setStatus(ok ? "添加成功" : "添加失败，用户名或工号可能已存在", !ok);
                     if (ok) { loadTeachers(); clearTeacherForm(); }
@@ -510,8 +592,24 @@ public class AdminMainView {
                 return;
             }
             if (!tPasswordField.getText().trim().isEmpty()
-                    && !tPasswordField.getText().trim().matches("^(?=.*[a-zA-Z]).{8,13}$")) {
-                setStatus("密码需8~13位且至少包含1个字母", true);
+                    && !tPasswordField.getText().trim().matches("^(?=.*[a-zA-Z])(?=.*[0-9]).{8,15}$")) {
+                setStatus("密码需8~15位且至少包含一位字母和一位数字", true);
+                return;
+            }
+            if (!tEmployeeIdField.getText().trim().matches("T\\d{7}")) {
+                setStatus("工号格式不正确，需为T加7位数字", true);
+                return;
+            }
+            if (tTitleField.getText().trim().length() < 2 || tTitleField.getText().trim().length() > 10) {
+                setStatus("职称长度需2~10位", true);
+                return;
+            }
+            if (tGenderField.getValue() == null) {
+                setStatus("请选择性别", true);
+                return;
+            }
+            if (tDepartmentField.getValue() == null) {
+                setStatus("请选择学院", true);
                 return;
             }
             new Thread(() -> {
@@ -519,7 +617,7 @@ public class AdminMainView {
                         tGenderField.getValue(),
                         tPasswordField.getText().trim().isEmpty() ? null : tPasswordField.getText().trim(),
                         tEmployeeIdField.getText().trim(), tTitleField.getText().trim(),
-                        tDepartmentField.getText().trim());
+                        tDepartmentField.getValue());
                 Platform.runLater(() -> {
                     setStatus(ok ? "修改成功" : "修改失败", !ok);
                     if (ok) { loadTeachers(); clearTeacherForm(); }
@@ -548,7 +646,7 @@ public class AdminMainView {
         tEmployeeIdField.setText(t.getEmployeeId());
         tGenderField.setValue(t.getGender() != null ? t.getGender() : null);
         tTitleField.setText(t.getTitle() != null ? t.getTitle() : "");
-        tDepartmentField.setText(t.getDepartment() != null ? t.getDepartment() : "");
+        tDepartmentField.setValue(t.getDepartment() != null ? t.getDepartment() : null);
         tUsernameField.setEditable(false);
         tAddBtn.setVisible(false);
         tSaveBtn.setVisible(true);
@@ -564,7 +662,7 @@ public class AdminMainView {
         tEmployeeIdField.clear();
         tGenderField.setValue(null);
         tTitleField.clear();
-        tDepartmentField.clear();
+        tDepartmentField.setValue(null);
         tAddBtn.setVisible(true);
         tSaveBtn.setVisible(false);
         tCancelBtn.setVisible(false);

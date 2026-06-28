@@ -53,7 +53,7 @@ public class ProfileView {
     private String currentUsername;
 
     private static final Pattern REG_USERNAME = Pattern.compile("^.{2,10}$");
-    private static final Pattern REG_PASSWORD = Pattern.compile("^(?=.*[a-zA-Z]).{8,13}$");
+    private static final Pattern REG_PASSWORD = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d).{8,15}$");
     private static final Pattern REG_SIGNATURE = Pattern.compile("^.{2,20}$");
 
     private static final String[] AVATAR_COLORS = {
@@ -301,7 +301,7 @@ public class ProfileView {
         PasswordField oldPwd = new PasswordField();
         oldPwd.setPromptText("旧密码");
         PasswordField newPwd = new PasswordField();
-        newPwd.setPromptText("新密码（8~13位，至少1个字母）");
+        newPwd.setPromptText("新密码（8~15位，至少1个字母和1个数字）");
         PasswordField confirm = new PasswordField();
         confirm.setPromptText("确认新密码");
         Label err = new Label();
@@ -332,7 +332,7 @@ public class ProfileView {
             }
             if (!newP.equals(cfm)) { err.setText("两次新密码不一致"); return null; }
             if (!REG_PASSWORD.matcher(newP).matches()) {
-                err.setText("新密码需8~13位且至少1个字母"); return null;
+                err.setText("新密码需8~15位且至少包含一位字母和一位数字"); return null;
             }
             Message m = new Message(MessageType.PROFILE_UPDATE_PASSWORD_REQ);
             m.setContent(oldP);

@@ -248,6 +248,39 @@ public class AdminManager {
         }
     }
 
+    public static List<String> getAllDepartments() {
+        List<String> list = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement("SELECT name FROM departments ORDER BY id")) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) list.add(rs.getString("name"));
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public static List<String> getMajorsByDepartment(String deptName) {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT m.name FROM majors m JOIN departments d ON m.department_id = d.id WHERE d.name = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, deptName);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) list.add(rs.getString("name"));
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public static List<String> getAllMajors() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT name FROM majors ORDER BY id";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) list.add(rs.getString("name"));
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
     private static String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

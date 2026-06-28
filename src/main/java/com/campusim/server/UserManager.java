@@ -322,7 +322,7 @@ public class UserManager {
                 if (!rs.getString("password").equals(hashPassword(oldPassword))) {
                     return null;
                 }
-                String newPassword = "123456";
+                String newPassword = "edu090909";
                 try (PreparedStatement update = conn.prepareStatement(
                          "UPDATE users SET password = ? WHERE username = ?")) {
                     update.setString(1, hashPassword(newPassword));

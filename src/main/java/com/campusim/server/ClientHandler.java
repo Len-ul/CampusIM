@@ -678,6 +678,21 @@ public class ClientHandler implements Runnable {
         String studentId = msg.getStudentId();
         String employeeId = msg.getEmployeeId();
 
+        if (newPassword == null || newPassword.length() < 8 || newPassword.length() > 15) {
+            Message res = new Message(MessageType.PROFILE_UPDATE_PASSWORD_RES);
+            res.setSuccess(false);
+            res.setReason("密码长度需8~15位");
+            sendMessage(res);
+            return;
+        }
+        if (!newPassword.matches(".*[a-zA-Z].*") || !newPassword.matches(".*[0-9].*")) {
+            Message res = new Message(MessageType.PROFILE_UPDATE_PASSWORD_RES);
+            res.setSuccess(false);
+            res.setReason("密码需至少包含一位字母和一位数字");
+            sendMessage(res);
+            return;
+        }
+
         String identityId;
         if ("STUDENT".equals(role)) {
             identityId = studentId;
