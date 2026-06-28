@@ -42,7 +42,7 @@ mvn exec:java@run-admin		#管理端
 |  教师  |    秋秋    |  edu090909  | T2024002  |
 
 ## 项目结构
----
+```
 CampusIM/
 ├── data/
 │   ├── avatars/          # 用户头像 PNG
@@ -86,7 +86,7 @@ CampusIM/
 ├── pom.xml
 ├── start.bat
 └── readme.md
----
+```
 ## 功能模块
 
 ---
