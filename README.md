@@ -4,6 +4,11 @@
 
 [CampusIM](https://github.com/Len-ul/CampusIM.git)是一个基于 C/S 架构的即时通讯与文件传输系统，专为校园环境设计。支持用户注册登录、在线状态管理、点对点私聊、公共群聊、表情及图片富媒体功能、聊天记录查询、个人资料编辑以及文件分块传输、群文件分发等功能。另含一个直连SQLite 的管理后台用于学生和教师信息的CRUD。系统采用 Java 语言开发，基于 JavaFX 构建界面，SQLite数据存储，使用 Socket 进行网络通信，提供稳定高效的实时交互体验。
 
+**项目地址**：
+
+- [Github](https://github.com/Len-ul/CampusIM)：https://github.com/Len-ul/CampusIM
+- [Gitee](https://gitee.com/Len-ul/campus-im)：https://gitee.com/Len-ul/campus-im
+
 ## 运行环境
 
 - **操作系统**: Windows 10/11, macOS, Linux
